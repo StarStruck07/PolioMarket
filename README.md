@@ -13,10 +13,10 @@ src/
   api/trade-route.example.ts   Reference Next.js POST /api/trade (not wired into an app)
 
 supabase/migrations/
-  0001_phase1_schema.sql        tables, enums, RLS, handle_new_user trigger
-  0002_phase3_trade_rpc.sql     lmsr_cost, lmsr_price, execute_trade (atomic)
-  0003_phase4_lifecycle.sql     create_market, set_market_status (admin)
-  0004_phase5_resolution.sql    resolve_market (admin, payout)
+  0001_schema.sql               tables, enums, RLS, handle_new_user trigger
+  0002_trade_rpc.sql            lmsr_cost, lmsr_price, execute_trade (atomic)
+  0003_market_lifecycle.sql     create_market, set_market_status (admin)
+  0004_resolution.sql           resolve_market (admin, payout)
 
 supabase/dryrun/         Self-contained local Postgres end-to-end test (Phase 6)
 ```
