@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -114,7 +116,7 @@ export default async function MarketPage({ params }: { params: { id: string } })
       {profile && (heldYes > 0 || heldNo > 0) && (
         <div className="card">
           <h3>Your position</h3>
-          <p>YES: <b>{heldYes.toFixed(2)}</b> · NO: <b>{heldNo.toFixed(2)}</b></p>
+          <p>{labels.yes}: <b>{heldYes.toFixed(2)}</b> · {labels.no}: <b>{heldNo.toFixed(2)}</b></p>
         </div>
       )}
 

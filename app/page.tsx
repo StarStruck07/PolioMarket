@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { type Market } from "@/lib/market";
 import MatchExplorer from "@/components/MatchExplorer";

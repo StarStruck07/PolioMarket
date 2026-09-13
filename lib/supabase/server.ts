@@ -12,6 +12,12 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
 export function createSupabaseServerClient() {
   const cookieStore = cookies();
   return createServerClient(SUPABASE_URL, SUPABASE_KEY, {
+      // Never let Next's Data Cache serve stale query results — this is a live
+      // market, and a cached-empty read was 404'ing valid market pages.
+      global: {
+        fetch: (input: RequestInfo | URL, init?: RequestInit) =>
+          fetch(input, { ...init, cache: "no-store" }),
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll();
