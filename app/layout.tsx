@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getProfile } from "@/lib/market";
+import { getProfile } from "@/lib/profile";
 import SignOutButton from "@/components/SignOutButton";
 import NavTabs from "@/components/NavTabs";
 
@@ -16,8 +15,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createSupabaseServerClient();
-  const profile = await getProfile(supabase).catch(() => null);
+  const profile = await getProfile().catch(() => null);
 
   return (
     <html lang="en">

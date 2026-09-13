@@ -1,9 +1,11 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { prices } from "@/src/lmsr";
 
 /**
  * Row shapes. Supabase returns NUMERIC columns as strings, so numeric fields
  * are typed as string and coerced with Number() at the edges.
+ *
+ * This module is client-safe (no server-only imports): getProfile lives in
+ * lib/profile.ts.
  */
 export interface Market {
   id: string;
@@ -48,7 +50,13 @@ export interface PricePoint {
   price_no: string;
 }
 
-/** Marginal yes/no prices for a market, via the shared LMSR module. */
+export interface LeaderRow {
+  rank: number;
+  name: string;
+  balance: string;
+}
+
+/** Marginal prices for a market, via the shared LMSR module. */
 export function marketPrices(m: Pick<Market, "b_param" | "q_yes" | "q_no">) {
   return prices(Number(m.b_param), Number(m.q_yes), Number(m.q_no));
 }
@@ -59,24 +67,20 @@ export function sides(m: Pick<Market, "team_a" | "team_b" | "question">): {
   b: string | null;
 } {
   if (m.team_a && m.team_b) return { a: m.team_a, b: m.team_b };
-  // Fall back to a "X vs Y" question if present.
   const parts = m.question.split(/\s+vs\.?\s+/i);
   if (parts.length === 2) return { a: parts[0]!.trim(), b: parts[1]!.trim() };
   return { a: m.question, b: null };
 }
 
-/** The logged-in user's profile (or null if not signed in / no row). */
-export async function getProfile(
-  supabase: SupabaseClient,
-): Promise<Profile | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data } = await supabase
-    .from("users")
-    .select("id, name, balance, is_admin")
-    .eq("id", user.id)
-    .maybeSingle();
-  return (data as Profile | null) ?? null;
+/**
+ * Labels for the two outcomes. Convention: YES = Team A wins, NO = Team B wins.
+ * Falls back to "Yes"/"No" when the market has no teams.
+ */
+export function outcomeLabels(m: Pick<Market, "team_a" | "team_b" | "question">): {
+  yes: string;
+  no: string;
+} {
+  const { a, b } = sides(m);
+  if (b) return { yes: a, no: b };
+  return { yes: "Yes", no: "No" };
 }

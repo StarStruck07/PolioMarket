@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
-import { marketPrices, sides, type Market } from "@/lib/market";
+import { marketPrices, outcomeLabels, sides, type Market } from "@/lib/market";
 import { sportMeta } from "@/lib/tags";
 
 export default function MatchCard({ m }: { m: Market }) {
@@ -8,6 +8,7 @@ export default function MatchCard({ m }: { m: Market }) {
   const yesPct = Math.round(p.yes * 100);
   const { a, b } = sides(m);
   const sm = sportMeta(m.sport);
+  const labels = outcomeLabels(m);
 
   return (
     <Link href={`/market/${m.id}`} className="match-card">
@@ -40,12 +41,12 @@ export default function MatchCard({ m }: { m: Market }) {
         <div className="no" style={{ width: `${100 - yesPct}%` }} />
       </div>
       <div className="price-legend">
-        <span className="yes-t">YES {(p.yes * 100).toFixed(0)}%</span>
-        <span className="no-t">NO {(p.no * 100).toFixed(0)}%</span>
+        <span className="yes-t">{labels.yes} {(p.yes * 100).toFixed(0)}%</span>
+        <span className="no-t">{labels.no} {(p.no * 100).toFixed(0)}%</span>
       </div>
 
       {m.status === "resolved" && (
-        <p className="resolved-note">✔ {m.winning_outcome?.toUpperCase()} won</p>
+        <p className="resolved-note">✔ {(m.winning_outcome === "yes" ? labels.yes : labels.no)} won</p>
       )}
     </Link>
   );

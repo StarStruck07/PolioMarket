@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getProfile, marketPrices, sides, type Market } from "@/lib/market";
+import { marketPrices, outcomeLabels, sides, type Market } from "@/lib/market";
+import { getProfile } from "@/lib/profile";
 import { sportMeta } from "@/lib/tags";
 
 interface Holding {
@@ -13,7 +14,7 @@ interface Holding {
 export default async function PortfolioPage() {
   const supabase = createSupabaseServerClient();
   const [profile, posRes] = await Promise.all([
-    getProfile(supabase).catch(() => null),
+    getProfile().catch(() => null),
     supabase.from("positions").select("outcome, shares, market:markets(*)"),
   ]);
   if (!profile) redirect("/login");
@@ -51,7 +52,7 @@ export default async function PortfolioPage() {
                   {sportMeta(h.market.sport).emoji} {b ? `${a} vs ${b}` : a}
                 </div>
                 <div className="muted">
-                  {shares.toFixed(2)} <span className={h.outcome === "yes" ? "yes-t" : "no-t"}>{h.outcome.toUpperCase()}</span> shares
+                  {shares.toFixed(2)} on <span className={h.outcome === "yes" ? "yes-t" : "no-t"}>{outcomeLabels(h.market)[h.outcome]}</span>
                 </div>
               </div>
               <div className="holding-val">
@@ -78,7 +79,7 @@ export default async function PortfolioPage() {
                   {sportMeta(h.market.sport).emoji} {b ? `${a} vs ${b}` : a}
                 </div>
                 <div className="muted">
-                  {shares.toFixed(2)} {h.outcome.toUpperCase()} · resolved {h.market.winning_outcome?.toUpperCase()}
+                  {shares.toFixed(2)} on {outcomeLabels(h.market)[h.outcome]} · winner: {h.market.winning_outcome ? outcomeLabels(h.market)[h.market.winning_outcome] : "—"}
                 </div>
               </div>
               <div className="holding-val">

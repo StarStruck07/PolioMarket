@@ -6,9 +6,13 @@ import { useRouter } from "next/navigation";
 export default function AdminMarketControls({
   marketId,
   status,
+  yesLabel,
+  noLabel,
 }: {
   marketId: string;
   status: "open" | "closed" | "resolved";
+  yesLabel: string;
+  noLabel: string;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -39,7 +43,8 @@ export default function AdminMarketControls({
     );
 
   const resolve = (winner: "yes" | "no") => {
-    if (!confirm(`Resolve this market as ${winner.toUpperCase()}? This pays out and cannot be undone.`)) return;
+    const label = winner === "yes" ? yesLabel : noLabel;
+    if (!confirm(`Resolve: ${label} won? This pays out winning shares and cannot be undone.`)) return;
     call(() =>
       fetch(`/api/markets/${marketId}/resolve`, {
         method: "POST",
@@ -50,7 +55,7 @@ export default function AdminMarketControls({
   };
 
   if (status === "resolved") {
-    return <p className="muted">Market is resolved — no further admin actions.</p>;
+    return <p className="muted">Market is resolved. You can still edit details or delete it below.</p>;
   }
 
   return (
@@ -65,8 +70,8 @@ export default function AdminMarketControls({
             Re-open market
           </button>
         )}
-        <button disabled={busy} onClick={() => resolve("yes")}>Resolve YES</button>
-        <button disabled={busy} onClick={() => resolve("no")}>Resolve NO</button>
+        <button disabled={busy} onClick={() => resolve("yes")}>{yesLabel} won</button>
+        <button disabled={busy} onClick={() => resolve("no")}>{noLabel} won</button>
       </div>
       {err && <p className="error" style={{ marginTop: 8 }}>{err}</p>}
     </div>

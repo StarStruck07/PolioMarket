@@ -1,78 +1,81 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+const UNI_DOMAIN = "pilani.bits-pilani.ac.in";
+
+function LoginInner() {
   const router = useRouter();
+  const params = useSearchParams();
   const supabase = createSupabaseBrowserClient();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(params.get("error"));
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  async function google() {
     setBusy(true);
     setMsg(null);
-    try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { name: name || email.split("@")[0] } },
-        });
-        if (error) throw error;
-        setMsg("Account created. If email confirmation is off, you can sign in now.");
-        setMode("signin");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        router.push("/");
-        router.refresh();
-      }
-    } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { hd: UNI_DOMAIN, prompt: "select_account" },
+      },
+    });
+    if (error) {
+      setMsg(error.message);
       setBusy(false);
     }
   }
 
+  async function emailLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setMsg(null);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setMsg(error.message);
+      setBusy(false);
+      return;
+    }
+    router.push("/");
+    router.refresh();
+  }
+
   return (
-    <div className="card" style={{ maxWidth: 380, margin: "40px auto" }}>
-      <h2>{mode === "signin" ? "Sign in" : "Create account"}</h2>
-      <form onSubmit={submit}>
-        {mode === "signup" && (
-          <>
-            <label>Display name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Alice" style={{ width: "100%" }} />
-          </>
-        )}
+    <div className="card login-card">
+      <h2>Welcome to BOSM Market</h2>
+      <p className="muted">Students: sign in with your college Google account.</p>
+
+      <button className="google-btn" onClick={google} disabled={busy}>
+        <span className="g">G</span> Continue with Google
+      </button>
+      <p className="muted tiny-note">Only <b>@{UNI_DOMAIN}</b> accounts are allowed.</p>
+
+      <div className="divider"><span>admin sign-in</span></div>
+
+      <form onSubmit={emailLogin}>
         <label>Email</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: "100%" }} />
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <label>Password</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} style={{ width: "100%" }} />
-        <button type="submit" disabled={busy} style={{ width: "100%", marginTop: 14 }}>
-          {busy ? "…" : mode === "signin" ? "Sign in" : "Sign up"}
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <button type="submit" className="secondary" disabled={busy} style={{ width: "100%", marginTop: 12 }}>
+          {busy ? "…" : "Sign in with email"}
         </button>
       </form>
-      {msg && <p className="muted" style={{ marginTop: 12 }}>{msg}</p>}
-      <p className="muted" style={{ marginTop: 12 }}>
-        {mode === "signin" ? "No account?" : "Have an account?"}{" "}
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            setMode(mode === "signin" ? "signup" : "signin");
-            setMsg(null);
-          }}
-        >
-          {mode === "signin" ? "Sign up" : "Sign in"}
-        </a>
-      </p>
+
+      {msg && <p className="error" style={{ marginTop: 14 }}>{msg}</p>}
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="card login-card">Loading…</div>}>
+      <LoginInner />
+    </Suspense>
   );
 }

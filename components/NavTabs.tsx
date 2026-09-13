@@ -7,6 +7,7 @@ export default function NavTabs({ isAdmin }: { isAdmin: boolean }) {
   const path = usePathname();
   const tabs: [string, string][] = [
     ["/", "Matches"],
+    ["/leaderboard", "Leaderboard"],
     ["/portfolio", "Portfolio"],
   ];
   if (isAdmin) tabs.push(["/admin", "Admin"]);

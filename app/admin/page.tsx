@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getProfile, sides, type Market, type AdminUser } from "@/lib/market";
+import { sides, type Market, type AdminUser } from "@/lib/market";
+import { getProfile } from "@/lib/profile";
 import { sportMeta } from "@/lib/tags";
 import CreateMarketForm from "@/components/CreateMarketForm";
 import AdminTabs from "@/components/AdminTabs";
@@ -9,7 +10,7 @@ import AdminUsersTable from "@/components/AdminUsersTable";
 
 export default async function AdminPage() {
   const supabase = createSupabaseServerClient();
-  const profile = await getProfile(supabase).catch(() => null);
+  const profile = await getProfile().catch(() => null);
 
   if (!profile) redirect("/login");
   if (!profile.is_admin) {

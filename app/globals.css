@@ -196,6 +196,33 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 button.secondary { background: #fff; color: var(--text); border: 1px solid var(--border); box-shadow: none; }
 button.danger { background: #fff; color: var(--no); border: 1px solid var(--no); box-shadow: none; }
 
+/* ---------- Login ---------- */
+.login-card { max-width: 400px; margin: 40px auto; }
+.google-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: #fff; color: #3c4043; border: 1px solid #dadce0; box-shadow: var(--shadow-sm);
+  padding: 12px; font-size: 15px; margin-top: 12px;
+}
+.google-btn:hover:not(:disabled) { background: #f7f8fb; }
+.google-btn .g {
+  display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px;
+  border-radius: 50%; background: conic-gradient(#ea4335 0 25%, #fbbc05 0 50%, #34a853 0 75%, #4285f4 0);
+  color: #fff; font-weight: 900; font-size: 13px;
+}
+.tiny-note { font-size: 12px; margin-top: 8px; text-align: center; }
+.divider { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; margin: 20px 0 6px; text-transform: uppercase; letter-spacing: .04em; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+/* ---------- Leaderboard ---------- */
+.leader-row {
+  display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.leader-row:last-child { border-bottom: none; }
+.leader-row.top { background: linear-gradient(90deg, #fff7e6, #fff); }
+.leader-rank { width: 34px; font-weight: 800; font-size: 18px; text-align: center; color: var(--muted); }
+.leader-name { flex: 1; font-weight: 700; }
+.leader-pts { font-weight: 800; color: var(--accent); }
+
 /* ---------- Misc ---------- */
 .muted { color: var(--muted); }
 .error { color: var(--no); font-weight: 600; }

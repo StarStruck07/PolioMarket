@@ -2,13 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
-  getProfile,
   marketPrices,
+  outcomeLabels,
   sides,
   type Market,
   type Position,
   type PricePoint,
 } from "@/lib/market";
+import { getProfile } from "@/lib/profile";
 import { sportMeta } from "@/lib/tags";
 import Avatar from "@/components/Avatar";
 import PriceChart from "@/components/PriceChart";
@@ -22,7 +23,7 @@ export default async function MarketPage({ params }: { params: { id: string } })
   // Run the independent reads in parallel to avoid a request waterfall.
   const [marketRes, profile, posRes, histRes] = await Promise.all([
     supabase.from("markets").select("*").eq("id", params.id).maybeSingle(),
-    getProfile(supabase).catch(() => null),
+    getProfile().catch(() => null),
     supabase.from("positions").select("outcome, shares").eq("market_id", params.id),
     supabase.rpc("market_price_history", { p_market_id: params.id }),
   ]);
@@ -39,6 +40,7 @@ export default async function MarketPage({ params }: { params: { id: string } })
   const yesPct = Math.round(p.yes * 100);
   const { a, b } = sides(market);
   const sm = sportMeta(market.sport);
+  const labels = outcomeLabels(market);
 
   return (
     <>
@@ -75,13 +77,13 @@ export default async function MarketPage({ params }: { params: { id: string } })
           <div className="no" style={{ width: `${100 - yesPct}%` }} />
         </div>
         <div className="price-legend">
-          <span className="yes-t">YES {(p.yes * 100).toFixed(1)}%</span>
-          <span className="no-t">NO {(p.no * 100).toFixed(1)}%</span>
+          <span className="yes-t">{labels.yes} {(p.yes * 100).toFixed(1)}%</span>
+          <span className="no-t">{labels.no} {(p.no * 100).toFixed(1)}%</span>
         </div>
 
         {market.status === "resolved" && (
           <p className="ok" style={{ marginTop: 10 }}>
-            ✔ Resolved — {market.winning_outcome?.toUpperCase()} won. Winning shares paid 1 pt each.
+            ✔ Resolved — {(market.winning_outcome === "yes" ? labels.yes : labels.no)} won. Winning shares paid 1 pt each.
           </p>
         )}
       </div>
@@ -103,6 +105,8 @@ export default async function MarketPage({ params }: { params: { id: string } })
             heldNo={heldNo}
             balance={Number(profile?.balance ?? 0)}
             loggedIn={!!profile}
+            yesLabel={labels.yes}
+            noLabel={labels.no}
           />
         </div>
       )}
@@ -117,13 +121,14 @@ export default async function MarketPage({ params }: { params: { id: string } })
       {profile?.is_admin && (
         <div className="card admin-card">
           <h3>Admin controls</h3>
-          <AdminMarketControls marketId={market.id} status={market.status} />
-          {market.status !== "resolved" && (
-            <>
-              <h4 style={{ marginTop: 18 }}>Edit match</h4>
-              <EditMarketForm market={market} />
-            </>
-          )}
+          <AdminMarketControls
+            marketId={market.id}
+            status={market.status}
+            yesLabel={labels.yes}
+            noLabel={labels.no}
+          />
+          <h4 style={{ marginTop: 18 }}>Edit match</h4>
+          <EditMarketForm market={market} />
         </div>
       )}
     </>
