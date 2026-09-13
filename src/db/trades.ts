@@ -56,7 +56,7 @@ export async function executeTrade(
  * Map a plpgsql `raise exception 'prefix: detail'` message to an HTTP status.
  * Prefixes are defined by the SQL functions (see the spec's Conventions table).
  */
-function statusForPgError(message: string): number {
+export function statusForPgError(message: string): number {
   if (message.startsWith("not_authenticated")) return 401;
   if (message.startsWith("admin_only")) return 403;
   if (
