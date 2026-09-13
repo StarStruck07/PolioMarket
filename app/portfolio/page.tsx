@@ -12,12 +12,13 @@ interface Holding {
 
 export default async function PortfolioPage() {
   const supabase = createSupabaseServerClient();
-  const profile = await getProfile(supabase).catch(() => null);
+  const [profile, posRes] = await Promise.all([
+    getProfile(supabase).catch(() => null),
+    supabase.from("positions").select("outcome, shares, market:markets(*)"),
+  ]);
   if (!profile) redirect("/login");
 
-  const { data } = await supabase
-    .from("positions")
-    .select("outcome, shares, market:markets(*)");
+  const data = posRes.data;
   const holdings = ((data as unknown as Holding[] | null) ?? []).filter(
     (h) => h.market && Number(h.shares) > 0,
   );

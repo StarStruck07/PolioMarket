@@ -10,6 +10,8 @@ export interface Market {
   question: string;
   team_a: string | null;
   team_b: string | null;
+  team_a_logo: string | null;
+  team_b_logo: string | null;
   sport: string | null;
   round: string | null;
   q_yes: string;
@@ -31,6 +33,13 @@ export interface Profile {
 export interface Position {
   outcome: "yes" | "no";
   shares: string;
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  balance: string;
+  is_admin: boolean;
 }
 
 export interface PricePoint {

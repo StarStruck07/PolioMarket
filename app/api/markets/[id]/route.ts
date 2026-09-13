@@ -29,6 +29,8 @@ export async function PATCH(
     p_sport: str(body?.sport),
     p_round: str(body?.round),
     p_b_param: bParam,
+    p_team_a_logo: str(body?.team_a_logo),
+    p_team_b_logo: str(body?.team_b_logo),
   });
   if (error) {
     return NextResponse.json({ error: error.message }, { status: statusForPgError(error.message) });

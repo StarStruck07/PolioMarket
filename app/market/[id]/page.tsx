@@ -19,28 +19,21 @@ import EditMarketForm from "@/components/EditMarketForm";
 export default async function MarketPage({ params }: { params: { id: string } }) {
   const supabase = createSupabaseServerClient();
 
-  const { data: marketRow } = await supabase
-    .from("markets")
-    .select("*")
-    .eq("id", params.id)
-    .maybeSingle();
-  const market = marketRow as Market | null;
+  // Run the independent reads in parallel to avoid a request waterfall.
+  const [marketRes, profile, posRes, histRes] = await Promise.all([
+    supabase.from("markets").select("*").eq("id", params.id).maybeSingle(),
+    getProfile(supabase).catch(() => null),
+    supabase.from("positions").select("outcome, shares").eq("market_id", params.id),
+    supabase.rpc("market_price_history", { p_market_id: params.id }),
+  ]);
+
+  const market = marketRes.data as Market | null;
   if (!market) notFound();
 
-  const profile = await getProfile(supabase).catch(() => null);
-
-  const { data: posRows } = await supabase
-    .from("positions")
-    .select("outcome, shares")
-    .eq("market_id", market.id);
-  const positions = (posRows as Position[] | null) ?? [];
+  const positions = (posRes.data as Position[] | null) ?? [];
   const heldYes = Number(positions.find((p) => p.outcome === "yes")?.shares ?? 0);
   const heldNo = Number(positions.find((p) => p.outcome === "no")?.shares ?? 0);
-
-  const { data: histRows } = await supabase.rpc("market_price_history", {
-    p_market_id: market.id,
-  });
-  const history = (histRows as PricePoint[] | null) ?? [];
+  const history = (histRes.data as PricePoint[] | null) ?? [];
 
   const p = marketPrices(market);
   const yesPct = Math.round(p.yes * 100);
@@ -62,14 +55,14 @@ export default async function MarketPage({ params }: { params: { id: string } })
 
         <div className="match-header-teams">
           <div className="team big">
-            <Avatar name={a} size={64} />
+            <Avatar name={a} size={64} logo={market.team_a_logo} />
             <span className="team-name">{a}</span>
           </div>
           {b && (
             <>
               <span className="vs big">vs</span>
               <div className="team big">
-                <Avatar name={b} size={64} />
+                <Avatar name={b} size={64} logo={market.team_b_logo} />
                 <span className="team-name">{b}</span>
               </div>
             </>

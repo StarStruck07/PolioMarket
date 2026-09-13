@@ -111,6 +111,16 @@ header.nav {
   border-radius: 50%; color: #fff; font-weight: 800; letter-spacing: -0.02em;
   box-shadow: 0 2px 6px rgba(0,0,0,0.14); border: 2px solid #fff;
 }
+.avatar-img { object-fit: cover; background: #fff; }
+
+.logo-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.upload-btn {
+  display: inline-block; margin: 0; padding: 6px 12px; font-size: 13px; font-weight: 700;
+  color: var(--accent2); background: #f0f1fb; border: 1px solid var(--border);
+  border-radius: 8px; cursor: pointer;
+}
+.upload-btn:hover { background: #e8e9fb; }
+button.tiny { padding: 5px 10px; font-size: 13px; }
 
 /* ---------- Chips / pills ---------- */
 .chip {

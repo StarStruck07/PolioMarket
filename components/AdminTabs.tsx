@@ -3,24 +3,27 @@
 import { useState, type ReactNode } from "react";
 
 export default function AdminTabs({
-  create,
-  manage,
+  tabs,
 }: {
-  create: ReactNode;
-  manage: ReactNode;
+  tabs: { key: string; label: string; node: ReactNode }[];
 }) {
-  const [tab, setTab] = useState<"create" | "manage">("create");
+  const [active, setActive] = useState(tabs[0]?.key ?? "");
+  const current = tabs.find((t) => t.key === active) ?? tabs[0];
+
   return (
     <>
       <div className="tabs">
-        <button className={tab === "create" ? "tab active" : "tab"} onClick={() => setTab("create")}>
-          ➕ Create
-        </button>
-        <button className={tab === "manage" ? "tab active" : "tab"} onClick={() => setTab("manage")}>
-          🗂 Manage
-        </button>
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            className={t.key === active ? "tab active" : "tab"}
+            onClick={() => setActive(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
-      <div>{tab === "create" ? create : manage}</div>
+      <div>{current?.node}</div>
     </>
   );
 }

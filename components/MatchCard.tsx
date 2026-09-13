@@ -21,14 +21,14 @@ export default function MatchCard({ m }: { m: Market }) {
 
       <div className="match-teams">
         <div className="team">
-          <Avatar name={a} size={40} />
+          <Avatar name={a} size={40} logo={m.team_a_logo} />
           <span className="team-name">{a}</span>
         </div>
         {b ? (
           <>
             <span className="vs">vs</span>
             <div className="team">
-              <Avatar name={b} size={40} />
+              <Avatar name={b} size={40} logo={m.team_b_logo} />
               <span className="team-name">{b}</span>
             </div>
           </>

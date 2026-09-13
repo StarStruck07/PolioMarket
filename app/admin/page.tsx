@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getProfile, sides, type Market } from "@/lib/market";
+import { getProfile, sides, type Market, type AdminUser } from "@/lib/market";
 import { sportMeta } from "@/lib/tags";
 import CreateMarketForm from "@/components/CreateMarketForm";
 import AdminTabs from "@/components/AdminTabs";
+import AdminUsersTable from "@/components/AdminUsersTable";
 
 export default async function AdminPage() {
   const supabase = createSupabaseServerClient();
@@ -21,11 +22,12 @@ export default async function AdminPage() {
     );
   }
 
-  const { data } = await supabase
-    .from("markets")
-    .select("*")
-    .order("created_at", { ascending: false });
-  const markets = (data as Market[] | null) ?? [];
+  const [marketsRes, usersRes] = await Promise.all([
+    supabase.from("markets").select("*").order("created_at", { ascending: false }),
+    supabase.rpc("admin_list_users"),
+  ]);
+  const markets = (marketsRes.data as Market[] | null) ?? [];
+  const users = (usersRes.data as AdminUser[] | null) ?? [];
 
   const manage = (
     <div className="card">
@@ -62,7 +64,13 @@ export default async function AdminPage() {
   return (
     <>
       <h1>Admin</h1>
-      <AdminTabs create={<div className="card"><h3>New market</h3><CreateMarketForm /></div>} manage={manage} />
+      <AdminTabs
+        tabs={[
+          { key: "create", label: "➕ Create", node: <div className="card"><h3>New market</h3><CreateMarketForm /></div> },
+          { key: "manage", label: "🗂 Manage", node: manage },
+          { key: "users", label: "👤 Users", node: <AdminUsersTable users={users} /> },
+        ]}
+      />
     </>
   );
 }
