@@ -48,7 +48,7 @@ export default async function MarketPage({ params }: { params: { id: string } })
     <>
       <p><Link href="/">← All matches</Link></p>
 
-      <div className="card match-header">
+      <div className="card match-header reveal">
         <div className="match-header-tags">
           <span className="chip" style={{ borderColor: sm.color, color: sm.color }}>
             {sm.emoji} {market.sport ?? "Match"}
@@ -90,7 +90,7 @@ export default async function MarketPage({ params }: { params: { id: string } })
         )}
       </div>
 
-      <div className="card">
+      <div className="card reveal">
         <h3>Price history</h3>
         <PriceChart points={history} yesLabel={labels.yes} />
       </div>

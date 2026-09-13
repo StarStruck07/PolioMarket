@@ -11,7 +11,7 @@ export default function MatchCard({ m }: { m: Market }) {
   const labels = outcomeLabels(m);
 
   return (
-    <Link href={`/market/${m.id}`} className="match-card">
+    <Link href={`/market/${m.id}`} className="match-card reveal">
       <div className="match-card-top">
         <span className="chip" style={{ borderColor: sm.color, color: sm.color }}>
           {sm.emoji} {m.sport ?? "Match"}
