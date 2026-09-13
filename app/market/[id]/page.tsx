@@ -1,9 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getProfile, marketPrices, type Market, type Position } from "@/lib/market";
+import {
+  getProfile,
+  marketPrices,
+  sides,
+  type Market,
+  type Position,
+  type PricePoint,
+} from "@/lib/market";
+import { sportMeta } from "@/lib/tags";
+import Avatar from "@/components/Avatar";
+import PriceChart from "@/components/PriceChart";
 import TradeWidget from "@/components/TradeWidget";
 import AdminMarketControls from "@/components/AdminMarketControls";
+import EditMarketForm from "@/components/EditMarketForm";
 
 export default async function MarketPage({ params }: { params: { id: string } }) {
   const supabase = createSupabaseServerClient();
@@ -18,7 +29,6 @@ export default async function MarketPage({ params }: { params: { id: string } })
 
   const profile = await getProfile(supabase).catch(() => null);
 
-  // Owner-scoped by RLS: returns only the current user's positions.
   const { data: posRows } = await supabase
     .from("positions")
     .select("outcome, shares")
@@ -27,32 +37,65 @@ export default async function MarketPage({ params }: { params: { id: string } })
   const heldYes = Number(positions.find((p) => p.outcome === "yes")?.shares ?? 0);
   const heldNo = Number(positions.find((p) => p.outcome === "no")?.shares ?? 0);
 
+  const { data: histRows } = await supabase.rpc("market_price_history", {
+    p_market_id: market.id,
+  });
+  const history = (histRows as PricePoint[] | null) ?? [];
+
   const p = marketPrices(market);
   const yesPct = Math.round(p.yes * 100);
+  const { a, b } = sides(market);
+  const sm = sportMeta(market.sport);
 
   return (
     <>
-      <p><Link href="/">← All markets</Link></p>
-      <div className="card">
-        <div className="row">
-          <h2 style={{ flex: 1, margin: 0 }}>{market.question}</h2>
+      <p><Link href="/">← All matches</Link></p>
+
+      <div className="card match-header">
+        <div className="match-header-tags">
+          <span className="chip" style={{ borderColor: sm.color, color: sm.color }}>
+            {sm.emoji} {market.sport ?? "Match"}
+          </span>
+          {market.round && <span className="chip subtle">{market.round}</span>}
           <span className={`pill ${market.status}`}>{market.status}</span>
         </div>
-        <div className="pricebar" style={{ marginTop: 12 }}>
+
+        <div className="match-header-teams">
+          <div className="team big">
+            <Avatar name={a} size={64} />
+            <span className="team-name">{a}</span>
+          </div>
+          {b && (
+            <>
+              <span className="vs big">vs</span>
+              <div className="team big">
+                <Avatar name={b} size={64} />
+                <span className="team-name">{b}</span>
+              </div>
+            </>
+          )}
+        </div>
+        <p className="sport-sub">{sm.emoji} {market.sport ?? "Prediction"}{market.round ? ` · ${market.round}` : ""}</p>
+
+        <div className="pricebar" style={{ marginTop: 14 }}>
           <div className="yes" style={{ width: `${yesPct}%` }} />
           <div className="no" style={{ width: `${100 - yesPct}%` }} />
         </div>
-        <div className="row muted" style={{ justifyContent: "space-between" }}>
-          <span>YES {(p.yes * 100).toFixed(1)}%</span>
-          <span>NO {(p.no * 100).toFixed(1)}%</span>
+        <div className="price-legend">
+          <span className="yes-t">YES {(p.yes * 100).toFixed(1)}%</span>
+          <span className="no-t">NO {(p.no * 100).toFixed(1)}%</span>
         </div>
-        <p className="muted" style={{ marginTop: 8 }}>
-          Liquidity b = {Number(market.b_param)} · q = [{Number(market.q_yes).toFixed(2)},{" "}
-          {Number(market.q_no).toFixed(2)}]
-        </p>
+
         {market.status === "resolved" && (
-          <p className="ok">Resolved — {market.winning_outcome?.toUpperCase()} won. Winning shares paid 1 pt each.</p>
+          <p className="ok" style={{ marginTop: 10 }}>
+            ✔ Resolved — {market.winning_outcome?.toUpperCase()} won. Winning shares paid 1 pt each.
+          </p>
         )}
+      </div>
+
+      <div className="card">
+        <h3>Price history</h3>
+        <PriceChart points={history} />
       </div>
 
       {market.status === "open" && (
@@ -74,14 +117,20 @@ export default async function MarketPage({ params }: { params: { id: string } })
       {profile && (heldYes > 0 || heldNo > 0) && (
         <div className="card">
           <h3>Your position</h3>
-          <p>YES: {heldYes.toFixed(2)} · NO: {heldNo.toFixed(2)}</p>
+          <p>YES: <b>{heldYes.toFixed(2)}</b> · NO: <b>{heldNo.toFixed(2)}</b></p>
         </div>
       )}
 
       {profile?.is_admin && (
-        <div className="card">
-          <h3>Admin</h3>
+        <div className="card admin-card">
+          <h3>Admin controls</h3>
           <AdminMarketControls marketId={market.id} status={market.status} />
+          {market.status !== "resolved" && (
+            <>
+              <h4 style={{ marginTop: 18 }}>Edit match</h4>
+              <EditMarketForm market={market} />
+            </>
+          )}
         </div>
       )}
     </>

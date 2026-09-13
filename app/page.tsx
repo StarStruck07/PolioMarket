@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { marketPrices, type Market } from "@/lib/market";
+import { type Market } from "@/lib/market";
+import MatchExplorer from "@/components/MatchExplorer";
 
 export default async function HomePage() {
   const supabase = createSupabaseServerClient();
@@ -13,36 +13,17 @@ export default async function HomePage() {
 
   return (
     <>
-      <h1>Markets</h1>
+      <section className="hero">
+        <h1>The Fest Prediction Market</h1>
+        <p>Trade on every match. Back your calls. Climb the board.</p>
+      </section>
+
       {error && <p className="error">Could not load markets: {error.message}</p>}
-      {markets.length === 0 && !error && (
-        <p className="muted">No markets yet. An admin can create one.</p>
+      {markets.length === 0 && !error ? (
+        <p className="muted empty">No markets yet — check back once an admin opens some.</p>
+      ) : (
+        <MatchExplorer markets={markets} />
       )}
-      {markets.map((m) => {
-        const p = marketPrices(m);
-        const yesPct = Math.round(p.yes * 100);
-        return (
-          <Link key={m.id} href={`/market/${m.id}`} style={{ display: "block", color: "inherit" }}>
-            <div className="card">
-              <div className="row">
-                <h3 style={{ flex: 1 }}>{m.question}</h3>
-                <span className={`pill ${m.status}`}>{m.status}</span>
-              </div>
-              <div className="pricebar">
-                <div className="yes" style={{ width: `${yesPct}%` }} />
-                <div className="no" style={{ width: `${100 - yesPct}%` }} />
-              </div>
-              <div className="row muted" style={{ justifyContent: "space-between" }}>
-                <span>YES {(p.yes * 100).toFixed(1)}%</span>
-                <span>NO {(p.no * 100).toFixed(1)}%</span>
-              </div>
-              {m.status === "resolved" && (
-                <p className="muted">Resolved: {m.winning_outcome?.toUpperCase()} won</p>
-              )}
-            </div>
-          </Link>
-        );
-      })}
     </>
   );
 }
