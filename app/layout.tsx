@@ -52,7 +52,7 @@ export default async function RootLayout({
         <main className="container">{children}</main>
         <footer className="site-footer">
           <span>🎯 BOSM Market</span>
-          <span className="muted">Play money. All in good sport.</span>
+          <span className="muted">🏆 Fest 2026</span>
         </footer>
       </body>
     </html>

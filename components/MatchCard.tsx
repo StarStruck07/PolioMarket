@@ -12,6 +12,7 @@ export default function MatchCard({ m }: { m: Market }) {
 
   return (
     <Link href={`/market/${m.id}`} className="match-card reveal">
+      <span className="card-watermark" aria-hidden>{sm.emoji}</span>
       <div className="match-card-top">
         <span className="chip" style={{ borderColor: sm.color, color: sm.color }}>
           {sm.emoji} {m.sport ?? "Match"}
