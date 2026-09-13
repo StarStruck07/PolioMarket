@@ -11,18 +11,19 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
 // (e.g. non-uni domain rejected by the DB gate) bounce to /login with a note.
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
+  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || origin;
   const code = searchParams.get("code");
   const oauthError = searchParams.get("error_description") ?? searchParams.get("error");
 
   if (oauthError) {
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(oauthError)}`);
+    return NextResponse.redirect(`${base}/login?error=${encodeURIComponent(oauthError)}`);
   }
   if (!code) {
-    return NextResponse.redirect(`${origin}/login`);
+    return NextResponse.redirect(`${base}/login`);
   }
 
   const cookieStore = cookies();
-  const response = NextResponse.redirect(`${origin}/`);
+  const response = NextResponse.redirect(`${base}/`);
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_KEY, {
     cookies: {
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
       error.message.includes("signup_not_allowed") || error.message.toLowerCase().includes("database")
         ? "Please sign in with your @pilani.bits-pilani.ac.in Google account."
         : error.message;
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(msg)}`);
+    return NextResponse.redirect(`${base}/login?error=${encodeURIComponent(msg)}`);
   }
 
   return response;

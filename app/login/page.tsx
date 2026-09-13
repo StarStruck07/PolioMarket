@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getSiteURL } from "@/lib/site";
 
 const UNI_DOMAIN = "pilani.bits-pilani.ac.in";
 
@@ -18,7 +19,7 @@ function LoginInner() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${getSiteURL()}/auth/callback`,
         queryParams: { prompt: "select_account" },
       },
     });
