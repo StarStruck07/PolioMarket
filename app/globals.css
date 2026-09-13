@@ -149,7 +149,7 @@ button.tiny { padding: 5px 10px; font-size: 13px; }
 .sport-sub { text-align: center; color: var(--muted); font-weight: 600; margin: 12px 0 0; }
 
 /* ---------- Chart ---------- */
-.chart svg { width: 100%; height: 200px; display: block; }
+.chart svg { width: 100%; height: auto; display: block; }
 .chart-axis { display: flex; justify-content: space-between; margin-top: 4px; font-size: 12px; }
 
 /* ---------- Admin sub-tabs ---------- */
@@ -197,7 +197,12 @@ button.secondary { background: #fff; color: var(--text); border: 1px solid var(-
 button.danger { background: #fff; color: var(--no); border: 1px solid var(--no); box-shadow: none; }
 
 /* ---------- Login ---------- */
-.login-card { max-width: 400px; margin: 40px auto; }
+.login-card { max-width: 400px; margin: 40px auto; text-align: center; }
+.login-badge {
+  width: 60px; height: 60px; margin: 0 auto 12px; border-radius: 18px; font-size: 30px;
+  display: flex; align-items: center; justify-content: center; background: var(--grad);
+  box-shadow: var(--shadow);
+}
 .google-btn {
   width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
   background: #fff; color: #3c4043; border: 1px solid #dadce0; box-shadow: var(--shadow-sm);

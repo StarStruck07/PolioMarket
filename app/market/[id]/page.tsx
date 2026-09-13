@@ -90,7 +90,7 @@ export default async function MarketPage({ params }: { params: { id: string } })
 
       <div className="card">
         <h3>Price history</h3>
-        <PriceChart points={history} />
+        <PriceChart points={history} yesLabel={labels.yes} />
       </div>
 
       {market.status === "open" && (
