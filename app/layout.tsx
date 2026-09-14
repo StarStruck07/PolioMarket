@@ -32,7 +32,7 @@ export default async function RootLayout({
         <ScrollReveal />
         <header className="nav">
           <Link className="brand" href="/">
-            <span className="brand-mark">🎯</span> BOSM<span className="brand-accent">Market</span>
+            BOSM<span className="brand-accent">Market</span>
           </Link>
           <NavTabs isAdmin={!!profile?.is_admin} />
           <div className="nav-right">
@@ -51,8 +51,7 @@ export default async function RootLayout({
         </header>
         <main className="container">{children}</main>
         <footer className="site-footer">
-          <span>🎯 BOSM Market</span>
-          <span className="muted">🏆 Fest 2026</span>
+          <span>BOSM Market</span>
         </footer>
       </body>
     </html>
